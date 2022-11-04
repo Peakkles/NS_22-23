@@ -92,7 +92,7 @@ public class Omni123 extends LinearOpMode {
 
         // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
         double axial = gamepad1.left_stick_y*0.5;  // Note: pushing stick forward gives negative value
-        double lateral = gamepad1.left_stick_x*-0.5;
+        double lateral = gamepad1.left_stick_x*0.5;
         double yaw = gamepad1.right_stick_x*0.5;
 
         waitForStart();
@@ -125,21 +125,21 @@ public class Omni123 extends LinearOpMode {
             }
             if (slow) {
                 axial = gamepad1.left_stick_y*0.2;  // Note: pushing stick forward gives negative value
-                lateral = gamepad1.left_stick_x*-0.2;
+                lateral = gamepad1.left_stick_x*0.2;
                 yaw = gamepad1.right_stick_x*0.2;
             }
 
             if(!slow) {
                 axial = gamepad1.left_stick_y*0.5;  // Note: pushing stick forward gives negative value
-                lateral = gamepad1.left_stick_x*-0.5;
+                lateral = gamepad1.left_stick_x*0.5;
                 yaw = gamepad1.right_stick_x*0.5;
             }
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
-            double leftFrontPower = axial - lateral + yaw;
-            double rightFrontPower = axial + lateral - yaw;
-            double leftBackPower = axial + lateral + yaw;
-            double rightBackPower = axial - lateral - yaw;
+            double leftFrontPower = axial + lateral + yaw;
+            double rightFrontPower = axial - lateral - yaw;
+            double leftBackPower = axial - lateral + yaw;
+            double rightBackPower = axial + lateral - yaw;
 
             // Normalize the values so no wheel power exceeds 100%
             // This ensures that the robot maintains the desired motion.
