@@ -16,8 +16,8 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 
 import java.util.ArrayList;
 
-@Autonomous(name="EncoderAuto")
-public class AprilTagAutonomousInitDetectionExample extends LinearOpMode {
+@Autonomous(name="TimeAuto")
+public class TimeAuto extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftFrontDrive = null;
 
@@ -82,15 +82,10 @@ public class AprilTagAutonomousInitDetectionExample extends LinearOpMode {
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftFrontDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftBackDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightBackDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFrontDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
         armRightPos = 1;
@@ -184,22 +179,17 @@ public class AprilTagAutonomousInitDetectionExample extends LinearOpMode {
 //        This is the actual movement part:
         if (tagOfInterest == null || tagOfInterest.id == LEFT) {
             //trajectory:
-            forwardByEncoder(1100, 0.1);
+            forwardByTime(0.1, 900);
             sleep(500);
-            rightByEncoder(510, -0.1);
-            //left
+            rightByTime(-0.1, 500);
         } else if (tagOfInterest.id == MIDDLE) {
             //trajectory:
-            forwardByEncoder(1100, 0.1);
+            forwardByTime(0.1, 900);
         } else {
             //trajectory:
-            forwardByEncoder(1100, 0.1);
-            sleep(500);
-            rightByEncoder(500, 0.1);
-            //right
+            forwardByTime(0.1, 900);
+            rightByTime(0.1, 500);
         }
-
-
 
     }
 
@@ -213,94 +203,23 @@ public class AprilTagAutonomousInitDetectionExample extends LinearOpMode {
         telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
     }
 
-//    positive power goes forward, negative power goes backward
-    void forwardByEncoder(int inches, double power) {
-//        inches *= some number (find this number by testing on field)
-        inches *= 1;
-        if(opModeIsActive()) {
-            leftFrontDrive.setPower(-power * motorCorrection + 0); // potentially *2 or +0.1
-            leftBackDrive.setPower(-power * motorCorrection + 0); // potentially *2 or +0.1
-            rightFrontDrive.setPower(-power);
-            rightBackDrive.setPower(-power);
 
-            while(opModeIsActive() && Math.abs(leftFrontDrive.getCurrentPosition()) < inches){
-//                do nothing
-                telemetry.addData("leftFront currentPos: ", leftFrontDrive.getCurrentPosition());
-                telemetry.update();
-            }
-
-            driveStop(); // this might be unnecessary
-
-            leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-            leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        }
-    }
-
-    void rightByEncoder(int inches, double power) {
-//        inches *= some number (find this number by testing on field)
-        inches *= 1;
-        if(opModeIsActive()) {
-            leftFrontDrive.setPower(power * motorCorrection + 0); // potentially *2 or +0.1
-            leftBackDrive.setPower(-power * motorCorrection + 0); // potentially *2 or +0.1
-            rightFrontDrive.setPower(-power);
-            rightBackDrive.setPower(power);
-
-            while(opModeIsActive() && Math.abs(leftFrontDrive.getCurrentPosition()) < inches) {
-//                do nothing
-                telemetry.addData("leftFront currentPos: ", leftFrontDrive.getCurrentPosition());
-                telemetry.update();
-            }
-            driveStop(); // this might be unnecessary
-
-            leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-            leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        }
-    }
-
-    //    forwards and right, plug in positive x and y
-    void diagonalByEncoder(int xInches, int yInches, double power) {
-        xInches*=-1;
-        yInches*=-1;
-
-        double max = Math.max(Math.abs(yInches-xInches), Math.abs(yInches+xInches));
-        leftFrontDrive.setPower(power * (yInches - xInches)/max);
-        rightFrontDrive.setPower(power * (yInches + xInches)/max);
-        leftBackDrive.setPower(power * (yInches + xInches)/max);
-        rightBackDrive.setPower(power * (yInches - xInches)/max);
-
-    }
-
+// positive power goes forwards
     void forwardByTime(double power, long time){
-        leftFrontDrive.setPower(-power);
-        leftBackDrive.setPower(-power);
+        leftFrontDrive.setPower(-power * motorCorrection + 0); // potentially *2 or +0.1
+        leftBackDrive.setPower(-power * motorCorrection + 0); // potentially *2 or +0.1
         rightFrontDrive.setPower(-power);
         rightBackDrive.setPower(-power);
 
         sleep(time);
         driveStop();
     }
-
+//    positive power goes right
     void rightByTime(double power, long time) {
-        leftFrontDrive.setPower(power);
-        leftBackDrive.setPower(power);
+        leftFrontDrive.setPower(power * motorCorrection + 0); // potentially *2 or +0.1
+        leftBackDrive.setPower(-power * motorCorrection + 0); // potentially *2 or +0.1
         rightFrontDrive.setPower(-power);
-        rightBackDrive.setPower(-power);
+        rightBackDrive.setPower(power);
 
         sleep(time);
         driveStop();
